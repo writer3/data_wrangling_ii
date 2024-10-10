@@ -48,7 +48,7 @@ marj_use_df =
   slice(-1) #subtracts first row
 ```
 
-Learning asssessment: import cost of living score table from https://www.bestplaces.net/.
+Learning asssessment: Create a data frame that contains the cost of living table for New York from https://www.bestplaces.net/cost_of_living/city/new_york/new_york.
 
 ```{r}
 nyc_cost_df =
@@ -56,4 +56,69 @@ nyc_cost_df =
   html_table(header = TRUE) |> #header says first row is header
   first()
 ```
+
+## CSS Selectors
+
+```{r}
+url = "https://www.imdb.com/list/ls070150896/"
+
+swm_html = read_html(url)
+```
+
+How to figure out which pieces from html I want. 
+1. Selector gadget
+2. pick movie title (green)
+3. clear something else you dont want (red)
+4. At the bottom of web page, you'll see the full CSS tag that you copy and paste into html_element function
+
+```{r}
+swm_html |> 
+  html_elements(".ipc-title-link-wrapper .ipc-title__text") |> 
+  html_text() #extract text from the element above
+
+swm_html |> 
+  html_elements(".dli-title-metadata-item:nth-child(2)") |> 
+  html_text()
+
+swm_html |> 
+  html_elements(".metacritic-score-box") |> 
+  html_text()
+```
+
+It would look like this to make a table:
+
+```{r}
+title_vec = 
+  swm_html |>
+  html_elements(".ipc-title-link-wrapper .ipc-title__text") |>
+  html_text()
+
+metascore_vec = 
+  swm_html |>
+  html_elements(".metacritic-score-box") |>
+  html_text()
+
+runtime_vec = 
+  swm_html |>
+  html_elements(".dli-title-metadata-item:nth-child(2)") |>
+  html_text()
+
+swm_df = 
+  tibble(
+    title = title_vec,
+    score = metascore_vec,
+    runtime = runtime_vec
+  )
+```
+
+Learning assessment: This page contains some (made up) books. Use a process similar to the one above to extract the book titles, stars, and price from https://books.toscrape.com/
+
+```{r}
+books_html = read_html("https://books.toscrape.com/")
+
+books_html |> 
+  html_elements(".product_pod a") |>
+  html_text()
+```
+
 
