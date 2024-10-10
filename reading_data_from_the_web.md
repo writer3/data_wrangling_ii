@@ -169,3 +169,58 @@ books_html |>
     ## [38] "Libertarianism for Beginners"         
     ## [39] ""                                     
     ## [40] "It's Only the Himalayas"
+
+## Use API
+
+API knows we are asking for data.
+
+Get water data. 1.
+<https://data.cityofnewyork.us/Environment/Water-Consumption-in-the-City-of-New-York/ia2d-e54m/about_data>
+2. Actions 3. API 4. API endpoint -\> data format to CSV 5. Copy API
+endpoint
+
+``` r
+nyc_water =
+  GET("https://data.cityofnewyork.us/resource/ia2d-e54m.csv") |>   content() #program knows it's csv and outputs just the data
+```
+
+    ## Rows: 45 Columns: 4
+    ## ── Column specification ────────────────────────────────────────────────────────
+    ## Delimiter: ","
+    ## dbl (4): year, new_york_city_population, nyc_consumption_million_gallons_per...
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+Get Behavioral Risk Factor study data
+
+``` r
+brfss_df = 
+  GET("https://chronicdata.cdc.gov/resource/acme-vg9e.csv",
+      query = list("$limit" = 5000)) |> #breaking the 1000 row limit to 5000 to get more data 
+  content()
+```
+
+    ## Rows: 5000 Columns: 23
+    ## ── Column specification ────────────────────────────────────────────────────────
+    ## Delimiter: ","
+    ## chr (16): locationabbr, locationdesc, class, topic, question, response, data...
+    ## dbl  (6): year, sample_size, data_value, confidence_limit_low, confidence_li...
+    ## lgl  (1): locationid
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+Pokemon API
+
+For Bulbasaur
+
+``` r
+poke = 
+  GET("http://pokeapi.co/api/v2/pokemon/1") |>
+  content()
+
+poke[["name"]]
+```
+
+    ## [1] "bulbasaur"
