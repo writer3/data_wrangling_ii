@@ -202,3 +202,71 @@ marj_use_df |>
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) #rotate the x-axis names by 90 degrees
 ```
 
+
+## NYC Restaurant Inspections
+
+```{r}
+data("rest_inspec")
+
+```
+
+```{r}
+rest_inspec |> 
+  count(boro, grade) |> 
+  pivot_wider(
+    names_from = grade,
+    values_from = n
+  )
+
+```
+
+
+Drop "missing" boro and focus only on A-C.
+```{r}
+rest_inspec = 
+  rest_inspec |> 
+  filter(
+    str_detect(grade, "[A-C]"),
+    !(boro == "Missing")
+  )
+
+```
+
+```{r}
+rest_inspec |> 
+  mutate(dba = str_to_sentence(dba)) |> 
+  filter(str_detect(dba, "Pizza")) #look for pizza places
+```
+
+Which boro has the most pizza places
+
+```{r}
+rest_inspec |> 
+  mutate(dba = str_to_sentence(dba)) |> 
+  filter(str_detect(dba, "Pizza")) |> 
+  mutate(boro = fct_infreq(boro)) |>  #putting boro (categorical) in the order of which one has the most frequency
+  ggplot(aes(x = boro)) +
+  geom_bar()
+```
+
+Careful...your order of mutate step matters whether you're doing str_replace first then fct_infreq or vice versa
+
+```{r}
+rest_inspec |> 
+  mutate(dba = str_to_sentence(dba)) |> 
+  filter(str_detect(dba, "Pizza")) |> 
+  mutate(
+    boro = str_replace(boro, "MANHATTAN", "THE CITY"),
+    boro = fct_infreq(boro) 
+    )|>  #putting boro (categorical) in the order of which one has the most frequency
+  ggplot(aes(x = boro)) +
+  geom_bar()
+```
+
+
+One last thing on factors...
+
+```{r}
+
+```
+

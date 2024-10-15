@@ -227,3 +227,96 @@ marj_use_df |>
 ```
 
 <img src="strings_and_factors_files/figure-gfm/unnamed-chunk-13-1.png" width="90%" />
+
+## NYC Restaurant Inspections
+
+``` r
+data("rest_inspec")
+```
+
+``` r
+rest_inspec |> 
+  count(boro, grade) |> 
+  pivot_wider(
+    names_from = grade,
+    values_from = n
+  )
+```
+
+    ## # A tibble: 6 × 8
+    ##   boro              A     B     C `Not Yet Graded`     P     Z  `NA`
+    ##   <chr>         <int> <int> <int>            <int> <int> <int> <int>
+    ## 1 BRONX         13688  2801   701              200   163   351 16833
+    ## 2 BROOKLYN      37449  6651  1684              702   416   977 51930
+    ## 3 MANHATTAN     61608 10532  2689              765   508  1237 80615
+    ## 4 Missing           4    NA    NA               NA    NA    NA    13
+    ## 5 QUEENS        35952  6492  1593              604   331   913 45816
+    ## 6 STATEN ISLAND  5215   933   207               85    47   149  6730
+
+Drop “missing” boro and focus only on A-C.
+
+``` r
+rest_inspec = 
+  rest_inspec |> 
+  filter(
+    str_detect(grade, "[A-C]"),
+    !(boro == "Missing")
+  )
+```
+
+``` r
+rest_inspec |> 
+  mutate(dba = str_to_sentence(dba)) |> 
+  filter(str_detect(dba, "Pizza")) #look for pizza places
+```
+
+    ## # A tibble: 775 × 18
+    ##    action          boro  building  camis critical_flag cuisine_description dba  
+    ##    <chr>           <chr> <chr>     <int> <chr>         <chr>               <chr>
+    ##  1 Violations wer… MANH… 151      5.00e7 Not Critical  Pizza               Pizz…
+    ##  2 Violations wer… MANH… 151      5.00e7 Critical      Pizza               Pizz…
+    ##  3 Violations wer… MANH… 151      5.00e7 Critical      Pizza               Pizz…
+    ##  4 Violations wer… MANH… 15       5.01e7 Critical      Pizza               & Pi…
+    ##  5 Violations wer… MANH… 151      5.00e7 Critical      Pizza               Pizz…
+    ##  6 Violations wer… MANH… 151      5.00e7 Not Critical  Pizza               Pizz…
+    ##  7 Violations wer… MANH… 15       5.01e7 Critical      Pizza               & Pi…
+    ##  8 Violations wer… MANH… 151      5.00e7 Critical      Pizza               Pizz…
+    ##  9 Violations wer… MANH… 84       5.00e7 Not Critical  Pizza               Pizza
+    ## 10 Violations wer… MANH… 525      5.01e7 Not Critical  Pizza               Pizz…
+    ## # ℹ 765 more rows
+    ## # ℹ 11 more variables: inspection_date <dttm>, inspection_type <chr>,
+    ## #   phone <chr>, record_date <dttm>, score <int>, street <chr>,
+    ## #   violation_code <chr>, violation_description <chr>, zipcode <int>,
+    ## #   grade <chr>, grade_date <dttm>
+
+Which boro has the most pizza places
+
+``` r
+rest_inspec |> 
+  mutate(dba = str_to_sentence(dba)) |> 
+  filter(str_detect(dba, "Pizza")) |> 
+  mutate(boro = fct_infreq(boro)) |>  #putting boro (categorical) in the order of which one has the most frequency
+  ggplot(aes(x = boro)) +
+  geom_bar()
+```
+
+<img src="strings_and_factors_files/figure-gfm/unnamed-chunk-18-1.png" width="90%" />
+
+Careful…your order of mutate step matters whether you’re doing
+str_replace first then fct_infreq or vice versa
+
+``` r
+rest_inspec |> 
+  mutate(dba = str_to_sentence(dba)) |> 
+  filter(str_detect(dba, "Pizza")) |> 
+  mutate(
+    boro = str_replace(boro, "MANHATTAN", "THE CITY"),
+    boro = fct_infreq(boro) 
+    )|>  #putting boro (categorical) in the order of which one has the most frequency
+  ggplot(aes(x = boro)) +
+  geom_bar()
+```
+
+<img src="strings_and_factors_files/figure-gfm/unnamed-chunk-19-1.png" width="90%" />
+
+One last thing on factors…
