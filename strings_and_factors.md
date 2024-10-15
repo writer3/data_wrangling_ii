@@ -320,3 +320,40 @@ rest_inspec |>
 <img src="strings_and_factors_files/figure-gfm/unnamed-chunk-19-1.png" width="90%" />
 
 One last thing on factors…
+
+``` r
+rest_inspec |> 
+  mutate(dba = str_to_sentence(dba)) |> 
+  filter(str_detect(dba, "Pizza")) |>
+  lm(zipcode ~ boro, data = _) #output is four regression coefficients, implicitly defining categorical variable with Bronx as a reference since it is the first in order of alphabet
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = zipcode ~ boro, data = filter(mutate(rest_inspec, 
+    ##     dba = str_to_sentence(dba)), str_detect(dba, "Pizza")))
+    ## 
+    ## Coefficients:
+    ##       (Intercept)       boroBROOKLYN      boroMANHATTAN         boroQUEENS  
+    ##           10461.2              761.2             -435.7              909.1  
+    ## boroSTATEN ISLAND  
+    ##            -150.9
+
+``` r
+rest_inspec |> 
+  mutate(dba = str_to_sentence(dba)) |> 
+  filter(str_detect(dba, "Pizza")) |>
+  mutate(boro = fct_infreq(boro)) |> 
+  lm(zipcode ~ boro, data = _) #now the output is four regression coefficients with BROOKLYN as the reference
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = zipcode ~ boro, data = mutate(filter(mutate(rest_inspec, 
+    ##     dba = str_to_sentence(dba)), str_detect(dba, "Pizza")), boro = fct_infreq(boro)))
+    ## 
+    ## Coefficients:
+    ##       (Intercept)         boroQUEENS      boroMANHATTAN          boroBRONX  
+    ##           11222.4              147.9            -1196.9             -761.2  
+    ## boroSTATEN ISLAND  
+    ##            -912.1

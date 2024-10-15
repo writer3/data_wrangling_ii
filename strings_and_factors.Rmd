@@ -267,6 +267,18 @@ rest_inspec |>
 One last thing on factors...
 
 ```{r}
-
+rest_inspec |> 
+  mutate(dba = str_to_sentence(dba)) |> 
+  filter(str_detect(dba, "Pizza")) |>
+  lm(zipcode ~ boro, data = _) #output is four regression coefficients, implicitly defining categorical variable with Bronx as a reference since it is the first in order of alphabet
 ```
+
+```{r}
+rest_inspec |> 
+  mutate(dba = str_to_sentence(dba)) |> 
+  filter(str_detect(dba, "Pizza")) |>
+  mutate(boro = fct_infreq(boro)) |> 
+  lm(zipcode ~ boro, data = _) #now the output is four regression coefficients with BROOKLYN as the reference
+```
+
 
