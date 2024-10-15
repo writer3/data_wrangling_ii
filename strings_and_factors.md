@@ -169,11 +169,17 @@ as.numeric(sex_vec)
 
     ## [1] 1 1 2 2
 
+## Revisit a lot of examples
+
+NSDUH
+
 ``` r
 url = "http://samhda.s3-us-gov-west-1.amazonaws.com/s3fs-public/field-uploads/2k15StateFiles/NSDUHsaeShortTermCHG2015.htm"
 
 drug_use_html = read_html(url)
 ```
+
+Get the pieces I actually need
 
 ``` r
 marj_use_df = 
@@ -182,3 +188,42 @@ marj_use_df =
   first() |> #takes first element out of the table or first table, can type in command line ?first to see if you can import an nth function to specify other elements
   slice(-1) #subtracts first row
 ```
+
+Get rid of p value Go from wide to long format Separate age and year Get
+rid of parentheses Get rid of abc’s Change percent to numerical format
+
+``` r
+marj_use_df = 
+  drug_use_html |> 
+  html_table() |> 
+  first() |> #takes first element out of the table or first table, can type in command line ?first to see if you can import an nth function to specify other elements
+  slice(-1) |>  #subtracts first row
+  select(-contains("P Value")) |> 
+  pivot_longer(
+    cols = -State,
+    names_to = "age_year",
+    values_to = "percent"
+  ) |> 
+  separate(age_year, into = c("age", "year"), sep = "\\(") |> 
+  mutate(
+    year = str_replace(year, "\\)", ""), #get rid of ")"
+    percent = str_remove(percent, "[a-c]$"), #in the percent variable, remove "[a-c]" to get rid of abc's based on the dataset 
+    percent = as.numeric(percent) #convert percent to numeric
+  )
+```
+
+Plot the proportion of ppl that said “yes” only among kids who are age
+12 - 17
+
+``` r
+marj_use_df |> 
+  filter(age == "12-17") |> 
+  mutate(
+    State = fct_reorder(State, percent) #reorder State (categorical) using percent (numerical) bc without this the plots are all over the place
+  ) |> 
+  ggplot(aes(x = State, y = percent, color = year)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) #rotate the x-axis names by 90 degrees
+```
+
+<img src="strings_and_factors_files/figure-gfm/unnamed-chunk-13-1.png" width="90%" />
